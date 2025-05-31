@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/stylesheets/homepage.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>SESP - Dashboard</title>
+  </head>
+  <body>
+    <div class="container">
+      <nav class="sidebar">
+        <div class="logo">
+          <h2>SESP</h2>
+        </div>
+        <ul class="nav-links">
+          <li class="active">
+            <a href="/student/homepage"
+              ><i class="fas fa-home"></i> Dashboard</a
+            >
+          </li>
+          <li>
+            <a href="/evaluation/myevaluation/<%= user._id %>"
+              ><i class="fas fa-chart-line"></i> My Evaluations</a
+            >
+          </li>
+          <li>
+            <a href="/performance/myperformance/<%= user._id %>"
+              ><i class="fas fa-graduation-cap"></i> My Performance</a
+            >
+          </li>
+          <li>
+            <a href="/evaluation/create"
+              ><i class="fas fa-plus-circle"></i> New Evaluation</a
+            >
+          </li>
+          <li>
+            <a href="/performance/create"
+              ><i class="fas fa-plus-circle"></i> New Performance</a
+            >
+          </li>
+          <li>
+            <a href="/student/logout"
+              ><i class="fas fa-sign-out-alt"></i> Logout</a
+            >
+          </li>
+        </ul>
+        <div class="user-info">
+          <div class="avatar">
+            <i class="fas fa-user-circle"></i>
+          </div>
+          <div class="user-details">
+            <h4><%= user.fullname %></h4>
+            <p><%= user.department %></p>
+          </div>
+        </div>
+      </nav>
+
+      <div class="main-content">
+        <header>
+          <h1>Student Dashboard</h1>
+          <div class="user-welcome">
+            <p>Welcome back, <%= user.fullname %></p>
+          </div>
+        </header>
+
+        <div class="server-msg">
+          <% if(hasErr){%> <% errMsg.forEach(message =>{ %>
+          <p class="has-error">
+            <i class="fas fa-exclamation-circle"></i> <%= message%>
+          </p>
+          <% })%> <% } %> <% if(hasSuccess){%> <% successMsg.forEach(message =>{
+          %>
+          <p class="has-success">
+            <i class="fas fa-check-circle"></i> <%= message%>
+          </p>
+          <% })%> <% } %>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="card summary-card">
+            <h3><i class="fas fa-chart-line"></i> Performance Summary</h3>
+            <div class="summary-stats">
+              <div class="stat">
+                <p>Evaluations</p>
+                <h2><%= evaluationCount || 0 %></h2>
+              </div>
+              <div class="stat">
+                <p>Courses</p>
+                <h2><%= performanceCount || 0 %></h2>
+              </div>
+              <div class="stat">
+                <p>Avg. Score</p>
+                <h2><%= averageScore || 0 %>%</h2>
+              </div>
+            </div>
+          </div>
+
+          <div class="card chart-card">
+            <h3><i class="fas fa-chart-bar"></i> Performance Analysis</h3>
+            <div class="chart-container">
+              <canvas id="performanceChart"></canvas>
+            </div>
+          </div>
+
+          <div class="card recent-card">
+            <h3><i class="fas fa-history"></i> Recent Activities</h3>
+            <div class="recent-list">
+              <% if(recentPerformances && recentPerformances.length > 0) { %> <%
+              recentPerformances.forEach(performance => { %>
+              <div class="recent-item">
+                <div class="recent-icon"><i class="fas fa-book"></i></div>
+                <div class="recent-details">
+                  <h4><%= performance.course %></h4>
+                  <p>
+                    Score: <%= performance.score %>% | Grade: <%=
+                    performance.grade %>
+                  </p>
+                  <small
+                    ><%= new Date(performance.date).toLocaleDateString()
+                    %></small
+                  >
+                </div>
+              </div>
+              <% }) %> <% } else { %>
+              <p class="no-data">No recent performance data available</p>
+              <% } %>
+            </div>
+          </div>
+
+          <div class="card strengths-card">
+            <h3><i class="fas fa-star"></i> Strengths & Weaknesses</h3>
+            <div class="strengths-weaknesses">
+              <div class="strength-section">
+                <h4>Strengths</h4>
+                <ul id="strengthsList">
+                  <li>Loading strengths...</li>
+                </ul>
+              </div>
+              <div class="weakness-section">
+                <h4>Areas to Improve</h4>
+                <ul id="weaknessesList">
+                  <li>Loading areas to improve...</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="card quick-actions">
+            <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+            <div class="action-buttons">
+              <a href="/evaluation/create" class="action-btn"
+                ><i class="fas fa-plus-circle"></i> New Evaluation</a
+              >
+              <a href="/performance/create" class="action-btn"
+                ><i class="fas fa-plus-circle"></i> New Performance</a
+              >
+              <a
+                href="/evaluation/myevaluation/<%= user._id %>"
+                class="action-btn"
+                ><i class="fas fa-chart-line"></i> View Evaluations</a
+              >
+              <a
+                href="/performance/myperformance/<%= user._id %>"
+                class="action-btn"
+                ><i class="fas fa-graduation-cap"></i> View Performance</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Sample data for the chart - this will be replaced with real data
+      document.addEventListener('DOMContentLoaded', function() {
+        // Performance Chart
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        const performanceChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: <%- JSON.stringify(courseLabels || ['No Courses']) %>,
+            datasets: [{
+              label: 'Course Scores',
+              data: <%- JSON.stringify(courseScores || [0]) %>,
+              backgroundColor: [
+                'rgba(75, 192, 192, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+                'rgba(153, 102, 255, 0.6)',
+                'rgba(255, 159, 64, 0.6)'
+              ],
+              borderColor: [
+                'rgba(75, 192, 192, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+              ],
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 100
+              }
+            }
+          }
+        });
+
+        // Populate strengths and weaknesses based on performance data
+        const strengths = <%- JSON.stringify(strengths || []) %>;
+        const weaknesses = <%- JSON.stringify(weaknesses || []) %>;
+
+        const strengthsList = document.getElementById('strengthsList');
+        const weaknessesList = document.getElementById('weaknessesList');
+
+        strengthsList.innerHTML = '';
+        weaknessesList.innerHTML = '';
+
+        if (strengths && strengths.length > 0) {
+          strengths.forEach(strength => {
+            strengthsList.innerHTML += `<li><i class="fas fa-check"></i> ${strength}</li>`;
+          });
+        } else {
+          strengthsList.innerHTML = '<li>No strengths data available</li>';
+        }
+
+        if (weaknesses && weaknesses.length > 0) {
+          weaknesses.forEach(weakness => {
+            weaknessesList.innerHTML += `<li><i class="fas fa-exclamation"></i> ${weakness}</li>`;
+          });
+        } else {
+          weaknessesList.innerHTML = '<li>No improvement areas data available</li>';
+        }
+      });
+    </script>
+  </body>
+</html>

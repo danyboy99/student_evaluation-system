@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/stylesheets/index.css" />
+    <title>SESP - Student Evaluation & Performance System</title>
+  </head>
+  <body>
+    <div class="main-container">
+      <div class="left-panel">
+        <div class="brand">
+          <i class="fas fa-chart-line brand-icon"></i>
+          <h1>SESP</h1>
+        </div>
+        <div class="intro-text">
+          <h2>Student Evaluation and Performance System</h2>
+          <p>
+            A comprehensive platform to analyze, track, and improve your
+            academic journey with powerful analytics and insights
+          </p>
+          <div class="features">
+            <div class="feature">
+              <i class="fas fa-chart-bar"></i>
+              <span>Performance Analytics</span>
+            </div>
+            <div class="feature">
+              <i class="fas fa-clipboard-check"></i>
+              <span>Self Evaluations</span>
+            </div>
+            <div class="feature">
+              <i class="fas fa-graduation-cap"></i>
+              <span>Academic Progress</span>
+            </div>
+            <div class="feature">
+              <i class="fas fa-trophy"></i>
+              <span>Achievement Tracking</span>
+            </div>
+            <div class="feature">
+              <i class="fas fa-users"></i>
+              <span>Peer Comparison</span>
+            </div>
+            <div class="feature">
+              <i class="fas fa-lightbulb"></i>
+              <span>Smart Insights</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-panel">
+        <div class="auth-container">
+          <div class="server-msg">
+            <% if(hasErr){ %> <% errMsg.forEach(function(message) { %>
+            <div class="alert alert-error">
+              <i class="fas fa-exclamation-circle"></i>
+              <p><%= message %></p>
+            </div>
+            <% }); %> <% } %> <% if(hasSuccess){ %> <%
+            successMsg.forEach(function(message) { %>
+            <div class="alert alert-success">
+              <i class="fas fa-check-circle"></i>
+              <p><%= message %></p>
+            </div>
+            <% }); %> <% } %>
+          </div>
+
+          <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('login')">
+              Login
+            </button>
+            <button class="tab-btn" onclick="showTab('register')">
+              Register
+            </button>
+          </div>
+
+          <div id="login" class="tab-content active">
+            <h3><i class="fas fa-sign-in-alt"></i> Welcome Back</h3>
+            <p class="tab-description">
+              Access your academic dashboard and continue tracking your progress
+            </p>
+
+            <form action="/student/login" method="post" class="auth-form">
+              <div class="form-group">
+                <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="password"
+                  ><i class="fas fa-lock"></i> Password</label
+                >
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-submit">
+                  <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div id="register" class="tab-content">
+            <h3><i class="fas fa-user-plus"></i> Create Account</h3>
+            <p class="tab-description">
+              Join SESP to start tracking your academic performance and unlock
+              powerful insights
+            </p>
+
+            <form action="/student/create" method="post" class="auth-form">
+              <div class="form-group">
+                <label for="reg-name"
+                  ><i class="fas fa-user"></i> Full Name</label
+                >
+                <input
+                  type="text"
+                  id="reg-name"
+                  name="name"
+                  placeholder="Enter your full name"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="reg-email"
+                  ><i class="fas fa-envelope"></i> Email Address</label
+                >
+                <input
+                  type="email"
+                  id="reg-email"
+                  name="email"
+                  placeholder="Enter your email address"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="reg-password"
+                  ><i class="fas fa-lock"></i> Password</label
+                >
+                <input
+                  type="password"
+                  id="reg-password"
+                  name="password"
+                  placeholder="Create a strong password"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="reg-confirm-password"
+                  ><i class="fas fa-lock"></i> Confirm Password</label
+                >
+                <input
+                  type="password"
+                  id="reg-confirm-password"
+                  name="confirmPassword"
+                  placeholder="Confirm your password"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="reg-student-id"
+                  ><i class="fas fa-id-card"></i> Department</label
+                >
+                <input
+                  type="text"
+                  id="reg-student-id"
+                  name="department"
+                  placeholder="Enter your Department"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="reg-student-id"
+                  ><i class="fas fa-id-card"></i>Year</label
+                >
+                <input
+                  type="text"
+                  id="reg-student-id"
+                  name="year"
+                  placeholder="Year"
+                  required
+                />
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-submit">
+                  <i class="fas fa-user-plus"></i> Create Account
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Modern tab switching with animations
+      function showTab(tabName) {
+        // Hide all tabs
+        document.querySelectorAll(".tab-content").forEach(function (tab) {
+          tab.classList.remove("active");
+        });
+
+        // Remove active class from all buttons
+        document.querySelectorAll(".tab-btn").forEach(function (btn) {
+          btn.classList.remove("active");
+        });
+
+        // Show the selected tab with animation
+        setTimeout(function () {
+          document.getElementById(tabName).classList.add("active");
+        }, 150);
+
+        // Add active class to clicked button
+        event.currentTarget.classList.add("active");
+      }
+
+      // Enhanced form interactions
+      document.addEventListener("DOMContentLoaded", function () {
+        // Add floating label effect
+        const inputs = document.querySelectorAll("input");
+        inputs.forEach(function (input) {
+          input.addEventListener("focus", function () {
+            this.parentElement.classList.add("focused");
+          });
+
+          input.addEventListener("blur", function () {
+            if (this.value === "") {
+              this.parentElement.classList.remove("focused");
+            }
+          });
+
+          // Check if input has value on load
+          if (input.value !== "") {
+            input.parentElement.classList.add("focused");
+          }
+        });
+
+        // Add form validation feedback
+        const forms = document.querySelectorAll("form");
+        forms.forEach(function (form) {
+          form.addEventListener("submit", function (e) {
+            const submitBtn = this.querySelector(".btn-submit");
+            submitBtn.innerHTML =
+              '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            submitBtn.disabled = true;
+          });
+        });
+
+        // Password confirmation validation
+        const confirmPassword = document.getElementById("reg-confirm-password");
+        const password = document.getElementById("reg-password");
+
+        if (confirmPassword && password) {
+          confirmPassword.addEventListener("input", function () {
+            if (this.value !== password.value) {
+              this.setCustomValidity("Passwords do not match");
+            } else {
+              this.setCustomValidity("");
+            }
+          });
+        }
+
+        // Add smooth animations on scroll
+        const observerOptions = {
+          threshold: 0.1,
+          rootMargin: "0px 0px -50px 0px",
+        };
+
+        const observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.style.opacity = "1";
+              entry.target.style.transform = "translateY(0)";
+            }
+          });
+        }, observerOptions);
+
+        // Observe feature cards
+        document.querySelectorAll(".feature").forEach(function (feature) {
+          feature.style.opacity = "0";
+          feature.style.transform = "translateY(20px)";
+          feature.style.transition = "opacity 0.6s ease, transform 0.6s ease";
+          observer.observe(feature);
+        });
+
+        // Add typing effect to the main heading
+        const heading = document.querySelector(".intro-text h2");
+        if (heading) {
+          const text = heading.textContent;
+          heading.textContent = "";
+          let i = 0;
+
+          function typeWriter() {
+            if (i < text.length) {
+              heading.textContent += text.charAt(i);
+              i++;
+              setTimeout(typeWriter, 50);
+            }
+          }
+
+          setTimeout(typeWriter, 500);
+        }
+      });
+    </script>
+  </body>
+</html>

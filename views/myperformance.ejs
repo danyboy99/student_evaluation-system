@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <link rel="stylesheet" href="/stylesheets/myperformance.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>SESP - Academic Performance Analytics</title>
+  </head>
+  <body>
+    <div class="page-container">
+      <header class="modern-header">
+        <div class="header-content">
+          <div class="logo">
+            <i class="fas fa-chart-bar logo-icon pulse"></i>
+            <h1>SESP</h1>
+          </div>
+          <nav class="main-nav">
+            <ul>
+              <li>
+                <a href="/student/homepage" class="active"
+                  ><i class="fas fa-home"></i> Dashboard</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/evaluation/myevaluation/<%= typeof user !== 'undefined' ? user._id : '' %>"
+                  ><i class="fas fa-clipboard-check"></i> Evaluations</a
+                >
+              </li>
+              <li>
+                <a href="/performance/create"
+                  ><i class="fas fa-plus-circle"></i> Add Record</a
+                >
+              </li>
+            </ul>
+          </nav>
+          <div class="header-actions">
+            <div class="user-profile">
+              <img
+                src="<%= typeof user !== 'undefined' && user.profilePic ? user.profilePic : 'https://ui-avatars.com/api/?name=Student&background=4361ee&color=fff' %>"
+                alt="Profile"
+                class="profile-pic"
+              />
+              <span class="user-name"
+                ><%= typeof user !== 'undefined' ? user.name : 'Student'
+                %></span
+              >
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="dashboard-header">
+        <div class="dashboard-title">
+          <h2><i class="fas fa-trophy"></i> Performance Dashboard</h2>
+          <p>Track your academic journey and identify growth opportunities</p>
+        </div>
+        <div class="time-period-selector">
+          <select id="timePeriod" onchange="filterByTimePeriod()">
+            <option value="all">All Time</option>
+            <option value="semester">Current Semester</option>
+            <option value="year">This Year</option>
+            <option value="month">This Month</option>
+          </select>
+        </div>
+      </div>
+
+      <main>
+        <% if(hasPerformance){ %>
+        <div class="performance-summary">
+          <div class="summary-card" data-aos="fade-up">
+            <div class="summary-icon">
+              <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="summary-content">
+              <h3>Average Score</h3>
+              <p class="summary-value" id="averageScore">Calculating...</p>
+              <div class="trend-indicator" id="scoreTrend"></div>
+            </div>
+            <div class="summary-chart">
+              <canvas id="scoreHistoryChart" height="60"></canvas>
+            </div>
+          </div>
+          <div class="summary-card" data-aos="fade-up" data-aos-delay="100">
+            <div class="summary-icon">
+              <i class="fas fa-user-check"></i>
+            </div>
+            <div class="summary-content">
+              <h3>Average Attendance</h3>
+              <p class="summary-value" id="averageAttendance">Calculating...</p>
+              <div class="trend-indicator" id="attendanceTrend"></div>
+            </div>
+            <div class="summary-chart">
+              <canvas id="attendanceHistoryChart" height="60"></canvas>
+            </div>
+          </div>
+          <div class="summary-card" data-aos="fade-up" data-aos-delay="200">
+            <div class="summary-icon">
+              <i class="fas fa-book"></i>
+            </div>
+            <div class="summary-content">
+              <h3>Total Courses</h3>
+              <p class="summary-value"><%= myPerformance.length %></p>
+              <div class="progress-bar-mini">
+                <div
+                  class="progress"
+                  style="
+                    width: <%= Math.min(myPerformance.length * 10, 100) %>%;
+                  "
+                ></div>
+              </div>
+            </div>
+            <div class="course-completion">
+              <span class="completion-text"
+                ><%= Math.min(myPerformance.length * 10, 100) %>% of
+                target</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-container">
+          <div class="chart-card" data-aos="zoom-in">
+            <div class="chart-header">
+              <h3><i class="fas fa-chart-line"></i> Performance Trends</h3>
+              <div class="chart-controls">
+                <button class="chart-control-btn active" data-chart="line">
+                  Line
+                </button>
+                <button class="chart-control-btn" data-chart="bar">Bar</button>
+              </div>
+            </div>
+            <div class="chart-wrapper">
+              <canvas id="performanceChart"></canvas>
+            </div>
+            <div class="chart-insights">
+              <i class="fas fa-lightbulb"></i>
+              <p id="performanceInsight">
+                Analyzing your performance trends...
+              </p>
+            </div>
+          </div>
+          <div class="chart-card" data-aos="zoom-in" data-aos-delay="100">
+            <div class="chart-header">
+              <h3><i class="fas fa-chart-pie"></i> Grade Distribution</h3>
+              <div class="chart-legend" id="gradeLegend"></div>
+            </div>
+            <div class="chart-wrapper">
+              <canvas id="gradeChart"></canvas>
+            </div>
+            <div class="chart-insights">
+              <i class="fas fa-lightbulb"></i>
+              <p id="gradeInsight">Analyzing your grade distribution...</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions-bar">
+          <a href="/performance/create" class="btn-create pulse-animation">
+            <i class="fas fa-plus-circle"></i> Add New Performance Record
+          </a>
+          <div class="filter-controls">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input
+                type="text"
+                id="searchCourse"
+                placeholder="Search courses..."
+                onkeyup="searchPerformance()"
+              />
+            </div>
+            <select
+              id="sortOptions"
+              onchange="sortPerformance()"
+              class="custom-select"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="scoreHigh">Highest Score</option>
+              <option value="scoreLow">Lowest Score</option>
+              <option value="courseAZ">Course (A-Z)</option>
+              <option value="courseZA">Course (Z-A)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="performance-grid" id="performanceContainer">
+          <% myPerformance.forEach((perform, index) => { %>
+          <div
+            class="performance-card"
+            data-date="<%= perform.date %>"
+            data-score="<%= perform.score %>"
+            data-attendance="<%= perform.attendance %>"
+            data-course="<%= perform.course %>"
+            data-grade="<%= perform.grade %>"
+            data-id="<%= perform._id %>"
+            data-aos="fade-up"
+            data-aos-delay="<%= index * 50 %>"
+          >
+            <div class="card-header">
+              <h3><%= perform.course %></h3>
+              <span class="grade-badge grade-<%= perform.grade.toLowerCase() %>"
+                ><%= perform.grade %></span
+              >
+            </div>
+            <div class="card-date">
+              <i class="far fa-calendar-alt"></i> <%= new
+              Date(perform.date).toLocaleDateString('en-US', { year: 'numeric',
+              month: 'short', day: 'numeric' }) %>
+            </div>
+            <div class="card-content">
+              <div class="metric-row">
+                <div class="metric">
+                  <span class="metric-label">Score</span>
+                  <div class="progress-container">
+                    <div
+                      class="progress-bar <%= perform.score < 50 ? 'low' : perform.score < 70 ? 'medium' : 'high' %>"
+                      style="width: <%= perform.score %>%"
+                    ></div>
+                    <span class="progress-text"><%= perform.score %>%</span>
+                  </div>
+                </div>
+              </div>
+              <div class="metric-row">
+                <div class="metric">
+                  <span class="metric-label">Attendance</span>
+                  <div class="progress-container">
+                    <div
+                      class="progress-bar attendance <%= perform.attendance < 50 ? 'low' : perform.attendance < 70 ? 'medium' : 'high' %>"
+                      style="width: <%= perform.attendance %>%"
+                    ></div>
+                    <span class="progress-text"
+                      ><%= perform.attendance %>%</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+            <% if(perform.score < 65){ %>
+            <div class="performance-warning">
+              <i class="fas fa-exclamation-triangle"></i> Your score is below
+              65%.
+              <a
+                href="https://www.khanacademy.org/computing"
+                class="resource-link"
+                target="_blank"
+              >
+                Get help <i class="fas fa-external-link-alt"></i>
+              </a>
+            </div>
+            <% } %>
+            <div class="card-actions">
+              <button
+                class="btn-action"
+                onclick="viewDetails(this)"
+                title="View Details"
+              >
+                <i class="fas fa-eye"></i>
+              </button>
+              <button
+                class="btn-action"
+                onclick="printPerformance(this)"
+                title="Print Report"
+              >
+                <i class="fas fa-print"></i>
+              </button>
+              <button
+                class="btn-action"
+                onclick="sharePerformance(this)"
+                title="Share"
+              >
+                <i class="fas fa-share-alt"></i>
+              </button>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+
+        <div class="pagination-container" id="paginationContainer">
+          <!-- Pagination will be generated by JavaScript -->
+        </div>
+
+        <% } else { %>
+        <div class="no-performance">
+          <div class="empty-state">
+            <i class="fas fa-chart-bar empty-icon"></i>
+            <h3>No Performance Records Yet</h3>
+            <p>
+              You haven't recorded any performance data yet. Start tracking your
+              academic progress by adding your first performance record.
+            </p>
+            <a
+              href="/performance/create"
+              class="btn-create-large pulse-animation"
+            >
+              <i class="fas fa-plus-circle"></i> Create Your First Performance
+              Record
+            </a>
+            <div class="empty-suggestions">
+              <h4>Why track your performance?</h4>
+              <ul>
+                <li>
+                  <i class="fas fa-check-circle"></i> Identify your academic
+                  strengths and weaknesses
+                </li>
+                <li>
+                  <i class="fas fa-check-circle"></i> Monitor your progress over
+                  time
+                </li>
+                <li>
+                  <i class="fas fa-check-circle"></i> Set goals and track your
+                  improvement
+                </li>
+                <li>
+                  <i class="fas fa-check-circle"></i> Get personalized
+                  recommendations
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <% } %>
+      </main>
+
+      <footer class="modern-footer">
+        <div class="footer-content">
+          <div class="footer-info">
+            <div class="footer-logo">
+              <i class="fas fa-chart-bar"></i>
+              <span>SESP</span>
+            </div>
+            <p>
+              &copy; <%= new Date().getFullYear() %> Student Evaluation and
+              Performance System
+            </p>
+          </div>
+          <div class="footer-links">
+            <a href="/student/homepage"
+              ><i class="fas fa-home"></i> Dashboard</a
+            >
+            <a
+              href="/evaluation/myevaluation/<%= typeof user !== 'undefined' ? user._id : '' %>"
+              ><i class="fas fa-clipboard-check"></i> My Evaluations</a
+            >
+            <a href="/help"><i class="fas fa-question-circle"></i> Help</a>
+            <a href="/student/logout"
+              ><i class="fas fa-sign-out-alt"></i> Logout</a
+            >
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Modal for detailed view -->
+    <div id="detailModal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div id="modalContent"></div>
+      </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div class="share-container">
+          <h3><i class="fas fa-share-alt"></i> Share Performance</h3>
+          <p>Share your performance record with others</p>
+          <div class="share-options">
+            <button class="share-btn email">
+              <i class="fas fa-envelope"></i> Email
+            </button>
+            <button class="share-btn whatsapp">
+              <i class="fab fa-whatsapp"></i> WhatsApp
+            </button>
+            <button class="share-btn twitter">
+              <i class="fab fa-twitter"></i> Twitter
+            </button>
+            <button class="share-btn facebook">
+              <i class="fab fa-facebook-f"></i> Facebook
+            </button>
+          </div>
+          <div class="share-link">
+            <input type="text" id="shareLink" readonly />
+            <button id="copyLink"><i class="fas fa-copy"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AOS Animation Library -->
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Initialize AOS animations
+        AOS.init({
+          duration: 800,
+          once: true,
+        });
+
+        // Calculate statistics
+        calculateStats();
+
+        // Initialize charts
+        initCharts();
+
+        // Setup pagination
+        setupPagination();
+
+        // Add event listeners for modal close buttons
+        document.querySelectorAll(".close-modal").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            document.querySelectorAll(".modal").forEach((modal) => {
+              modal.style.display = "none";
+            });
+          });
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener("click", function (event) {
+          document.querySelectorAll(".modal").forEach((modal) => {
+            if (event.target == modal) {
+              modal.style.display = "none";
+            }
+          });
+        });
+
+        // Chart type toggle
+        document.querySelectorAll(".chart-control-btn").forEach((btn) => {
+          btn.addEventListener("click", function () {
+            document
+              .querySelectorAll(".chart-control-btn")
+              .forEach((b) => b.classList.remove("active"));
+            this.classList.add("active");
+            updateChartType(this.dataset.chart);
+          });
+        });
+
+        // Copy share link
+        document
+          .getElementById("copyLink")
+          .addEventListener("click", function () {
+            const shareLink = document.getElementById("shareLink");
+            shareLink.select();
+            document.execCommand("copy");
+            this.innerHTML = '<i class="fas fa-check"></i>';
+            setTimeout(() => {
+              this.innerHTML = '<i class="fas fa-copy"></i>';
+            }, 2000);
+          });
+      });
+
+      function calculateStats() {
+        const performances = Array.from(
+          document.querySelectorAll(".performance-card")
+        );
+
+        if (performances.length > 0) {
+          // Calculate average score
+          let totalScore = 0;
+          let scores = [];
+          performances.forEach((card) => {
+            const score = parseInt(card.dataset.score);
+            totalScore += score;
+            scores.push(score);
+          });
+          const avgScore = (totalScore / performances.length).toFixed(1);
+          document.getElementById("averageScore").textContent = avgScore + "%";
+
+          // Add trend indicator
+          const scoreTrend = document.getElementById("scoreTrend");
+          if (avgScore > 75) {
+            scoreTrend.innerHTML = '<i class="fas fa-arrow-up"></i> Excellent';
+            scoreTrend.className = "trend-indicator positive";
+          } else if (avgScore > 60) {
+            scoreTrend.innerHTML = '<i class="fas fa-arrow-right"></i> Good';
+            scoreTrend.className = "trend-indicator neutral";
+          } else {
+            scoreTrend.innerHTML =
+              '<i class="fas fa-arrow-down"></i> Needs Improvement';
+            scoreTrend.className = "trend-indicator negative";
+          }
+
+          // Calculate average attendance
+          let totalAttendance = 0;
+          let attendances = [];
+          performances.forEach((card) => {
+            const attendance = parseInt(card.dataset.attendance);
+            totalAttendance += attendance;
+            attendances.push(attendance);
+          });
+          const avgAttendance = (totalAttendance / performances.length).toFixed(
+            1
+          );
+          document.getElementById("averageAttendance").textContent =
+            avgAttendance + "%";
+
+          // Add trend indicator for attendance
+          const attendanceTrend = document.getElementById("attendanceTrend");
+          if (avgAttendance > 80) {
+            attendanceTrend.innerHTML =
+              '<i class="fas fa-arrow-up"></i> Excellent';
+            attendanceTrend.className = "trend-indicator positive";
+          } else if (avgAttendance > 70) {
+            attendanceTrend.innerHTML =
+              '<i class="fas fa-arrow-right"></i> Good';
+            attendanceTrend.className = "trend-indicator neutral";
+          } else {
+            attendanceTrend.innerHTML =
+              '<i class="fas fa-arrow-down"></i> Needs Improvement';
+            attendanceTrend.className = "trend-indicator negative";
+          }
+        }
+      }
+
+      function initCharts() {
+        const performances = Array.from(
+          document.querySelectorAll(".performance-card")
+        );
+
+        if (performances.length > 0) {
+          // Performance chart data
+          const courses = performances.map((card) => card.dataset.course);
+          const scores = performances.map((card) =>
+            parseInt(card.dataset.score)
+          );
+          const attendances = performances.map((card) => {
+            const attendanceText = card.querySelector(
+              ".progress-bar.attendance"
+            ).style.width;
+            return parseInt(attendanceText);
+          });
+
+          // Performance trend chart
+          const perfCtx = document
+            .getElementById("performanceChart")
+            .getContext("2d");
+          new Chart(perfCtx, {
+            type: "line",
+            data: {
+              labels: courses,
+              datasets: [
+                {
+                  label: "Score",
+                  data: scores,
+                  borderColor: "#3498db",
+                  backgroundColor: "rgba(52, 152, 219, 0.1)",
+                  tension: 0.3,
+                  borderWidth: 2,
+                  pointBackgroundColor: "#3498db",
+                  pointRadius: 4,
+                },
+                {
+                  label: "Attendance",
+                  data: attendances,
+                  borderColor: "#2ecc71",
+                  backgroundColor: "rgba(46, 204, 113, 0.1)",
+                  tension: 0.3,
+                  borderWidth: 2,
+                  pointBackgroundColor: "#2ecc71",
+                  pointRadius: 4,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: "top",
+                },
+                tooltip: {
+                  mode: "index",
+                  intersect: false,
+                },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  max: 100,
+                  title: {
+                    display: true,
+                    text: "Percentage (%)",
+                  },
+                },
+                x: {
+                  title: {
+                    display: true,
+                    text: "Courses",
+                  },
+                },
+              },
+            },
+          });
+
+          // Grade distribution chart
+          const gradeCtx = document
+            .getElementById("gradeChart")
+            .getContext("2d");
+
+          // Count grades
+          const grades = {};
+          performances.forEach((card) => {
+            const grade = card.querySelector(".grade-badge").textContent;
+            grades[grade] = (grades[grade] || 0) + 1;
+          });
+
+          new Chart(gradeCtx, {
+            type: "doughnut",
+            data: {
+              labels: Object.keys(grades),
+              datasets: [
+                {
+                  data: Object.values(grades),
+                  backgroundColor: [
+                    "#2ecc71", // A
+                    "#3498db", // B
+                    "#f1c40f", // C
+                    "#e67e22", // D
+                    "#e74c3c", // F
+                  ],
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: "right",
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function (context) {
+                      const label = context.label || "";
+                      const value = context.raw || 0;
+                      const total = context.dataset.data.reduce(
+                        (a, b) => a + b,
+                        0
+                      );
+                      const percentage = Math.round((value / total) * 100);
+                      return `Grade ${label}: ${percentage}% (${value} courses)`;
+                    },
+                  },
+                },
+              },
+              cutout: "70%",
+            },
+          });
+        }
+      }
+
+      function animateCards() {
+        const cards = document.querySelectorAll(".performance-card");
+        cards.forEach((card, index) => {
+          setTimeout(() => {
+            card.classList.add("visible");
+          }, 100 * index);
+        });
+      }
+
+      function sortPerformance() {
+        const container = document.getElementById("performanceContainer");
+        const cards = Array.from(
+          container.getElementsByClassName("performance-card")
+        );
+        const sortBy = document.getElementById("sortOptions").value;
+
+        cards.sort((a, b) => {
+          if (sortBy === "newest") {
+            return new Date(b.dataset.date) - new Date(a.dataset.date);
+          } else if (sortBy === "oldest") {
+            return new Date(a.dataset.date) - new Date(b.dataset.date);
+          } else if (sortBy === "scoreHigh") {
+            return parseInt(b.dataset.score) - parseInt(a.dataset.score);
+          } else if (sortBy === "scoreLow") {
+            return parseInt(a.dataset.score) - parseInt(b.dataset.score);
+          }
+        });
+
+        cards.forEach((card) => container.appendChild(card));
+      }
+
+      function viewDetails(button) {
+        const card = button.closest(".performance-card");
+        const performance = {
+          course: card.dataset.course,
+          date: card.dataset.date,
+          score: parseInt(card.dataset.score),
+          attendance: parseInt(card.dataset.attendance),
+          grade: card.dataset.grade,
+          _id: card.dataset.id,
+        };
+
+        const modal = document.getElementById("detailModal");
+        const modalContent = document.getElementById("modalContent");
+
+        modalContent.innerHTML = `
+          <div class="modal-header">
+            <h3><i class="fas fa-chart-line"></i> Performance Details</h3>
+            <span class="close-modal">&times;</span>
+          </div>
+          <div class="modal-body">
+            <div class="detail-header">
+              <h2>${performance.course}</h2>
+              <span class="detail-grade grade-${performance.grade.toLowerCase()}">${
+          performance.grade
+        }</span>
+            </div>
+            <div class="detail-date">
+              <i class="far fa-calendar-alt"></i>
+              ${new Date(performance.date).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </div>
+            <div class="detail-metrics">
+              <div class="detail-metric">
+                <h3>Academic Score</h3>
+                <div class="detail-progress">
+                  <div class="detail-progress-bar ${
+                    performance.score < 50
+                      ? "low"
+                      : performance.score < 70
+                      ? "medium"
+                      : "high"
+                  }"
+                       style="width: ${performance.score}%"></div>
+                </div>
+                <div class="progress-text">${performance.score}%</div>
+              </div>
+              <div class="detail-metric">
+                <h3>Attendance Rate</h3>
+                <div class="detail-progress">
+                  <div class="detail-progress-bar attendance ${
+                    performance.attendance < 50
+                      ? "low"
+                      : performance.attendance < 70
+                      ? "medium"
+                      : "high"
+                  }"
+                       style="width: ${performance.attendance}%"></div>
+                </div>
+                <div class="progress-text">${performance.attendance}%</div>
+              </div>
+            </div>
+            <div class="detail-analysis">
+              <h3><i class="fas fa-analytics"></i> Performance Analysis</h3>
+              <div class="analysis-content">
+                ${getScoreAnalysis(performance.score)}
+                ${getAttendanceAnalysis(performance.attendance)}
+              </div>
+            </div>
+            <div class="detail-recommendations">
+              <h3><i class="fas fa-lightbulb"></i> Recommendations</h3>
+              <ul>
+                ${getRecommendations(performance.score, performance.attendance)}
+              </ul>
+            </div>
+            <div class="detail-actions">
+              <button class="btn-detail-action" onclick="printPerformance(${JSON.stringify(
+                performance
+              ).replace(/"/g, "&quot;")})">
+                <i class="fas fa-print"></i> Print Report
+              </button>
+              <button class="btn-detail-action" onclick="sharePerformance(${JSON.stringify(
+                performance
+              ).replace(/"/g, "&quot;")})">
+                <i class="fas fa-share-alt"></i> Share
+              </button>
+            </div>
+          </div>
+        `;
+
+        modal.style.display = "block";
+
+        // Add event listener for the close button in the modal
+        modalContent
+          .querySelector(".close-modal")
+          .addEventListener("click", function () {
+            modal.style.display = "none";
+          });
+      }
+
+      function getScoreAnalysis(score) {
+        if (score >= 90) {
+          return '<p class="analysis excellent"><i class="fas fa-star"></i> Excellent! You\'re performing at the top of your class.</p>';
+        } else if (score >= 80) {
+          return '<p class="analysis good"><i class="fas fa-thumbs-up"></i> Very good performance. Keep up the good work!</p>';
+        } else if (score >= 70) {
+          return '<p class="analysis average"><i class="fas fa-check"></i> Good performance, but there\'s room for improvement.</p>';
+        } else if (score >= 60) {
+          return '<p class="analysis below-average"><i class="fas fa-exclamation"></i> You\'re passing, but consider seeking additional help.</p>';
+        } else {
+          return '<p class="analysis poor"><i class="fas fa-exclamation-triangle"></i> Your performance needs significant improvement. Seek help immediately.</p>';
+        }
+      }
+
+      function getAttendanceAnalysis(attendance) {
+        if (attendance >= 90) {
+          return '<p class="analysis excellent"><i class="fas fa-calendar-check"></i> Excellent attendance record!</p>';
+        } else if (attendance >= 80) {
+          return '<p class="analysis good"><i class="fas fa-calendar-alt"></i> Good attendance. Try to maintain this level.</p>';
+        } else if (attendance >= 70) {
+          return '<p class="analysis average"><i class="fas fa-calendar"></i> Average attendance. Try to improve.</p>';
+        } else {
+          return '<p class="analysis poor"><i class="fas fa-calendar-times"></i> Poor attendance. This may affect your performance.</p>';
+        }
+      }
+
+      function getRecommendations(score, attendance) {
+        let recommendations = [];
+
+        if (score < 70) {
+          recommendations.push(
+            "<li>Consider seeking additional tutoring or study groups</li>"
+          );
+          recommendations.push(
+            "<li>Review course materials more frequently</li>"
+          );
+          recommendations.push(
+            "<li>Meet with your instructor during office hours</li>"
+          );
+        }
+
+        if (attendance < 80) {
+          recommendations.push(
+            "<li>Improve class attendance to better understand course material</li>"
+          );
+          recommendations.push("<li>Set reminders for class schedules</li>");
+        }
+
+        if (score >= 80 && attendance >= 80) {
+          recommendations.push("<li>Keep up the excellent work!</li>");
+          recommendations.push(
+            "<li>Consider helping other students as a tutor</li>"
+          );
+          recommendations.push(
+            "<li>Challenge yourself with advanced coursework</li>"
+          );
+        }
+
+        return recommendations.join("");
+      }
+
+      function printPerformance(button) {
+        const card = button.closest(".performance-card");
+        const performance = {
+          course: card.dataset.course,
+          date: card.dataset.date,
+          score: parseInt(card.dataset.score),
+          attendance: parseInt(card.dataset.attendance),
+          grade: card.dataset.grade,
+          _id: card.dataset.id,
+        };
+
+        const printWindow = window.open("", "_blank");
+
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>Performance Report - ${performance.course}</title>
+              <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .header { text-align: center; margin-bottom: 30px; }
+                .metric { margin: 15px 0; }
+                .score { font-size: 18px; font-weight: bold; }
+              </style>
+            </head>
+            <body>
+              <div class="header">
+                <h1>Performance Report</h1>
+                <h2>${performance.course}</h2>
+                <p>Date: ${new Date(performance.date).toLocaleDateString()}</p>
+              </div>
+              <div class="metric">
+                <strong>Grade:</strong> ${performance.grade}
+              </div>
+              <div class="metric">
+                <strong>Score:</strong> <span class="score">${
+                  performance.score
+                }%</span>
+              </div>
+              <div class="metric">
+                <strong>Attendance:</strong> <span class="score">${
+                  performance.attendance
+                }%</span>
+              </div>
+            </body>
+          </html>
+        `);
+
+        printWindow.document.close();
+        printWindow.print();
+      }
+
+      function sharePerformance(button) {
+        const card = button.closest(".performance-card");
+        const performance = {
+          course: card.dataset.course,
+          date: card.dataset.date,
+          score: parseInt(card.dataset.score),
+          attendance: parseInt(card.dataset.attendance),
+          grade: card.dataset.grade,
+          _id: card.dataset.id,
+        };
+
+        const shareModal = document.getElementById("shareModal");
+        const shareLink = document.getElementById("shareLink");
+
+        // Generate a shareable link (you can customize this)
+        const shareUrl = `${window.location.origin}/performance/share/${performance._id}`;
+        shareLink.value = shareUrl;
+
+        shareModal.style.display = "block";
+      }
+
+      function searchPerformance() {
+        const searchTerm = document
+          .getElementById("searchCourse")
+          .value.toLowerCase();
+        const cards = document.querySelectorAll(".performance-card");
+
+        cards.forEach((card) => {
+          const course = card.dataset.course.toLowerCase();
+          if (course.includes(searchTerm)) {
+            card.style.display = "block";
+          } else {
+            card.style.display = "none";
+          }
+        });
+      }
+
+      function filterByTimePeriod() {
+        const period = document.getElementById("timePeriod").value;
+        const cards = document.querySelectorAll(".performance-card");
+        const now = new Date();
+
+        cards.forEach((card) => {
+          const cardDate = new Date(card.dataset.date);
+          let showCard = true;
+
+          switch (period) {
+            case "month":
+              showCard = now - cardDate <= 30 * 24 * 60 * 60 * 1000;
+              break;
+            case "semester":
+              showCard = now - cardDate <= 120 * 24 * 60 * 60 * 1000;
+              break;
+            case "year":
+              showCard = cardDate.getFullYear() === now.getFullYear();
+              break;
+            default:
+              showCard = true;
+          }
+
+          card.style.display = showCard ? "block" : "none";
+        });
+      }
+
+      function setupPagination() {
+        const cards = document.querySelectorAll(".performance-card");
+        const cardsPerPage = 6;
+        const totalPages = Math.ceil(cards.length / cardsPerPage);
+
+        if (totalPages <= 1) return;
+
+        const paginationContainer = document.getElementById(
+          "paginationContainer"
+        );
+        let paginationHTML = '<div class="pagination">';
+
+        for (let i = 1; i <= totalPages; i++) {
+          paginationHTML += `<button class="pagination-btn page ${
+            i === 1 ? "active" : ""
+          }" onclick="goToPage(${i})">${i}</button>`;
+        }
+
+        paginationHTML += "</div>";
+        paginationContainer.innerHTML = paginationHTML;
+
+        // Show first page
+        showPage(1, cardsPerPage);
+      }
+
+      function goToPage(page) {
+        const cardsPerPage = 6;
+        showPage(page, cardsPerPage);
+
+        // Update active pagination button
+        document
+          .querySelectorAll(".pagination-btn.page")
+          .forEach((btn) => btn.classList.remove("active"));
+        document
+          .querySelector(`.pagination-btn.page:nth-child(${page})`)
+          .classList.add("active");
+      }
+
+      function showPage(page, cardsPerPage) {
+        const cards = document.querySelectorAll(".performance-card");
+        const startIndex = (page - 1) * cardsPerPage;
+        const endIndex = startIndex + cardsPerPage;
+
+        cards.forEach((card, index) => {
+          if (index >= startIndex && index < endIndex) {
+            card.style.display = "block";
+          } else {
+            card.style.display = "none";
+          }
+        });
+      }
+
+      function updateChartType(type) {
+        // This function would update the chart type
+        // Implementation depends on your chart library
+        console.log("Updating chart type to:", type);
+      }
+    </script>
+  </body>
+</html>

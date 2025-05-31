@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/stylesheets/myevaluation.css" />
+    <title>SESP - My Evaluations</title>
+  </head>
+  <body>
+    <div class="page-container">
+      <header>
+        <div class="header-content">
+          <div class="logo">
+            <i class="fas fa-chart-line"></i>
+            <h1>SESP</h1>
+          </div>
+          <h2>Self-Evaluation Records</h2>
+          <div class="header-actions">
+            <a href="/student/homepage" class="btn-dashboard">
+              <i class="fas fa-home"></i> Dashboard
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <div class="page-title">
+          <h2><i class="fas fa-clipboard-check"></i> My Self-Evaluations</h2>
+          <p>Track your academic goals and self-assessments</p>
+        </div>
+
+        <div class="actions-bar">
+          <a href="/evaluation/create" class="btn-create">
+            <i class="fas fa-plus-circle"></i> New Evaluation
+          </a>
+          <div class="filter-sort">
+            <select id="sortOptions" onchange="sortEvaluations()">
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="course">By Course Name</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="evaluations-grid" id="evaluationsContainer">
+          <% if(hasEvaluation){ %> <% myevaluation.forEach(eva =>{ %>
+          <div
+            class="evaluation-card"
+            data-date="<%= eva.dateOfEvaluation %>"
+            data-course="<%= eva.course %>"
+          >
+            <div class="card-header">
+              <h3><%= eva.course %></h3>
+              <span class="badge badge-<%= eva.desiredGrade.toLowerCase() %>"
+                ><%= eva.desiredGrade %></span
+              >
+            </div>
+            <div class="card-date">
+              <i class="far fa-calendar-alt"></i> <%= new
+              Date(eva.dateOfEvaluation).toLocaleDateString('en-US', { year:
+              'numeric', month: 'short', day: 'numeric' }) %>
+            </div>
+            <div class="card-content">
+              <div class="info-row">
+                <span class="info-label"
+                  ><i class="fas fa-user-graduate"></i> Participation:</span
+                >
+                <span
+                  class="info-value participation-<%= eva.classParticipation.toLowerCase().replace(' ', '-') %>"
+                  ><%= eva.classParticipation %></span
+                >
+              </div>
+              <div class="info-row">
+                <span class="info-label"
+                  ><i class="fas fa-bullseye"></i> Goal:</span
+                >
+                <p class="info-value goal-text"><%= eva.goal %></p>
+              </div>
+              <div class="info-row">
+                <span class="info-label"
+                  ><i class="fas fa-comment"></i> Comment:</span
+                >
+                <p class="info-value comment-text"><%= eva.comment %></p>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="btn-action" onclick="printEvaluation(this)">
+                <i class="fas fa-print"></i>
+              </button>
+              <button class="btn-action" onclick="shareEvaluation(this)">
+                <i class="fas fa-share-alt"></i>
+              </button>
+            </div>
+          </div>
+          <% }) %> <% } else { %>
+          <div class="no-evaluation">
+            <div class="empty-state">
+              <i class="fas fa-clipboard"></i>
+              <h3>No Evaluations Yet</h3>
+              <p>
+                You haven't created any self-evaluations yet. Start tracking
+                your academic progress by creating your first evaluation.
+              </p>
+              <a href="/evaluation/create" class="btn-create-large">
+                <i class="fas fa-plus-circle"></i> Create Your First Evaluation
+              </a>
+            </div>
+          </div>
+          <% } %>
+        </div>
+      </main>
+
+      <footer>
+        <div class="footer-content">
+          <p>
+            &copy; <%= new Date().getFullYear() %> Student Evaluation and
+            Performance System
+          </p>
+          <div class="footer-links">
+            <a href="/student/homepage">Dashboard</a>
+            <a
+              href="/performance/myperformance/<%= typeof user !== 'undefined' ? user._id : '' %>"
+              >My Performance</a
+            >
+            <a href="/student/logout">Logout</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      function sortEvaluations() {
+        const container = document.getElementById("evaluationsContainer");
+        const cards = Array.from(
+          container.getElementsByClassName("evaluation-card")
+        );
+        const sortBy = document.getElementById("sortOptions").value;
+
+        cards.sort((a, b) => {
+          if (sortBy === "newest") {
+            return new Date(b.dataset.date) - new Date(a.dataset.date);
+          } else if (sortBy === "oldest") {
+            return new Date(a.dataset.date) - new Date(b.dataset.date);
+          } else if (sortBy === "course") {
+            return a.dataset.course.localeCompare(b.dataset.course);
+          }
+        });
+
+        cards.forEach((card) => container.appendChild(card));
+      }
+
+      function printEvaluation(button) {
+        const card = button.closest(".evaluation-card");
+        const content = card.cloneNode(true);
+        const printWindow = window.open("", "_blank");
+
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>Evaluation Report</title>
+              <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                .print-header { text-align: center; margin-bottom: 20px; }
+                .content { border: 1px solid #ddd; padding: 20px; }
+                .info-row { margin-bottom: 10px; }
+                .info-label { font-weight: bold; }
+              </style>
+            </head>
+            <body>
+              <div class="print-header">
+                <h1>Student Self-Evaluation Report</h1>
+                <p>Generated on ${new Date().toLocaleDateString()}</p>
+              </div>
+              <div class="content">
+                ${content.innerHTML}
+              </div>
+            </body>
+          </html>
+        `);
+
+        printWindow.document.close();
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 500);
+      }
+
+      function shareEvaluation(button) {
+        const card = button.closest(".evaluation-card");
+        const course = card.querySelector("h3").textContent;
+
+        // This is a placeholder for actual sharing functionality
+        alert(
+          `Share functionality for ${course} would be implemented here. In a real application, this could open a modal with sharing options.`
+        );
+      }
+    </script>
+  </body>
+</html>

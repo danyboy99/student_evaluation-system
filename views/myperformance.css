@@ -1,0 +1,123 @@
+/* Reset and Global Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f5f7fa;
+  color: #333;
+  line-height: 1.6;
+  padding: 20px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+header h1 {
+  font-size: 28px;
+  color: #2c3e50;
+}
+
+main {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.performance-container {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.performance-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.performance-container p {
+  margin-bottom: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.performance-container p:last-child {
+  border-bottom: none;
+}
+
+.performance-container p strong {
+  color: #2c3e50;
+  display: inline-block;
+  width: 150px;
+}
+
+.performance-warning {
+  background-color: #fdecea;
+  border-left: 4px solid #e74c3c;
+  padding: 10px;
+  margin-top: 10px;
+  color: #c0392b;
+}
+
+.no-performance {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 30px;
+  text-align: center;
+}
+
+.no-performance p {
+  margin-bottom: 20px;
+  color: #7f8c8d;
+}
+
+.create-btn {
+  display: inline-block;
+  background-color: #3498db;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.create-btn:hover {
+  background-color: #2980b9;
+}
+
+.back-link {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.back-link a {
+  color: #3498db;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.back-link a i {
+  margin-right: 5px;
+}
+
+.back-link a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .performance-container p strong {
+    display: block;
+    width: 100%;
+    margin-bottom: 5px;
+  }
+}

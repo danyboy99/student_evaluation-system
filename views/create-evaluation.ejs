@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/stylesheets/forms.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <title>SESP - Create Evaluation</title>
+  </head>
+  <body>
+    <div class="container">
+      <nav class="sidebar">
+        <div class="logo">
+          <h2>SESP</h2>
+        </div>
+        <ul class="nav-links">
+          <li>
+            <a href="/student/homepage"
+              ><i class="fas fa-home"></i> Dashboard</a
+            >
+          </li>
+          <li>
+            <a href="/evaluation/myevaluation/<%= user._id %>"
+              ><i class="fas fa-chart-line"></i> My Evaluations</a
+            >
+          </li>
+          <li>
+            <a href="/performance/myperformance/<%= user._id %>"
+              ><i class="fas fa-graduation-cap"></i> My Performance</a
+            >
+          </li>
+          <li class="active">
+            <a href="/evaluation/create"
+              ><i class="fas fa-plus-circle"></i> New Evaluation</a
+            >
+          </li>
+          <li>
+            <a href="/performance/create"
+              ><i class="fas fa-plus-circle"></i> New Performance</a
+            >
+          </li>
+          <li>
+            <a href="/student/logout"
+              ><i class="fas fa-sign-out-alt"></i> Logout</a
+            >
+          </li>
+        </ul>
+        <div class="user-info">
+          <div class="avatar">
+            <i class="fas fa-user-circle"></i>
+          </div>
+          <div class="user-details">
+            <h4><%= user.fullname %></h4>
+            <p><%= user.department %></p>
+          </div>
+        </div>
+      </nav>
+
+      <div class="main-content">
+        <header>
+          <h1>Create New Self-Evaluation</h1>
+          <div class="user-welcome">
+            <p>Welcome back, <%= user.fullname %></p>
+          </div>
+        </header>
+
+        <div class="server-msg">
+          <% if(hasErr){%> <% errMsg.forEach(message =>{ %>
+          <p class="has-error">
+            <i class="fas fa-exclamation-circle"></i> <%= message%>
+          </p>
+          <% })%> <% } %> <% if(hasSuccess){%> <% successMsg.forEach(message =>{
+          %>
+          <p class="has-success">
+            <i class="fas fa-check-circle"></i> <%= message%>
+          </p>
+          <% })%> <% } %>
+        </div>
+
+        <div class="form-container">
+          <div class="form-header">
+            <h2><i class="fas fa-clipboard-list"></i> Self-Evaluation Form</h2>
+            <p>
+              Reflect on your academic progress and set goals for improvement
+            </p>
+          </div>
+
+          <form action="/evaluation/create" method="post">
+            <div class="form-group">
+              <label for="course"> <i class="fas fa-book"></i> Course </label>
+              <input
+                type="text"
+                id="course"
+                name="course"
+                required
+                placeholder="Enter the course name"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="desiredGrade">
+                <i class="fas fa-award"></i> Desired Grade
+              </label>
+              <select id="desiredGrade" name="desiredGrade" required>
+                <option value="" disabled selected>
+                  Select your desired grade
+                </option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+                <option value="E">E</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="classParticipation">
+                <i class="fas fa-hand-paper"></i> Class Participation
+              </label>
+              <select
+                id="classParticipation"
+                name="classParticipation"
+                required
+              >
+                <option value="" disabled selected>
+                  Rate your class participation
+                </option>
+                <option value="Excellent">Excellent</option>
+                <option value="Good">Good</option>
+                <option value="Average">Average</option>
+                <option value="Below Average">Below Average</option>
+                <option value="Poor">Poor</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="goal">
+                <i class="fas fa-bullseye"></i> Academic Goal
+              </label>
+              <textarea
+                id="goal"
+                name="goal"
+                required
+                placeholder="What are your academic goals for this course?"
+                rows="4"
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="comment">
+                <i class="fas fa-comment"></i> Comments
+              </label>
+              <textarea
+                id="comment"
+                name="comment"
+                required
+                placeholder="Any additional comments or reflections"
+                rows="4"
+              ></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn-submit">
+                <i class="fas fa-save"></i> Save Evaluation
+              </button>
+              <a href="/student/homepage" class="btn-cancel">
+                <i class="fas fa-times"></i> Cancel
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
